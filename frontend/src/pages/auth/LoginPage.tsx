@@ -5,24 +5,29 @@ import XSvg from "../../components/svg/xsvg";
 
 import { MdOutlineMail } from "react-icons/md";
 import { MdPassword } from "react-icons/md";
+import useAuth from "../../hooks/useAuth";
+import toast, { LoaderIcon } from "react-hot-toast";
 
+type FormDataType = {
+	username: string;
+	password: string;
+}
 const LoginPage = () => {
-	const [formData, setFormData] = useState({
+	const [formData, setFormData] = useState<FormDataType>({
 		username: "",
 		password: "",
 	});
-
-	const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+	const { signin, state } = useAuth();
+	const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		console.log(formData);
+		await signin(formData.username, formData.password);
+		toast.success('Logged in successfully');
 	};
 
 	const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
 		setFormData({ ...formData, [e.target.name]: e.target.value });
 	};
-
-	const isError = false;
-
+	const isError = state.error !== null;
 	return (
 		<div className='max-w-screen-xl mx-auto flex h-screen'>
 			<div className='flex-1 hidden lg:flex items-center  justify-center'>
@@ -55,8 +60,8 @@ const LoginPage = () => {
 							value={formData.password}
 						/>
 					</label>
-					<button className='btn rounded-full btn-primary text-white'>Login</button>
-					{isError && <p className='text-red-500'>Something went wrong</p>}
+					<button className='btn rounded-full btn-primary text-white'>{state.isLoading ? <LoaderIcon className="animate-spin" /> : "Login"}</button>
+					{isError && <p className='text-red-500 text-sm'>{state.error}</p>}
 				</form>
 				<div className='flex flex-col gap-2 mt-4'>
 					<p className='text-white text-lg'>{"Don't"} have an account?</p>

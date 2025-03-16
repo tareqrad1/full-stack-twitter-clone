@@ -7,7 +7,10 @@ import { generateTokenAndSetCookie } from '../lib/generateToken.js';
 
 
 export const signup = async(req, res) => {
-    const { username, fullname, email, password } = req.body;
+    const { username, fullname, email, password, confirmPassword } = req.body;
+    if(!username || !fullname || !email || !password || !confirmPassword) {
+        return res.status(400).json({ status: FAIL, error: 'Please provide all fields' });
+    }
     const { error } = signupSchema.validate(req.body);
     if(error) return res.status(400).json({ status: FAIL, error: error.details[0].message });
     try {
@@ -26,7 +29,6 @@ export const signup = async(req, res) => {
             password: hashPassword,
             email,
         });
-        generateTokenAndSetCookie({ id: newUser._id }, res);
         await newUser.save();
         res.status(201).json({ status: SUCCESS, message: 'Signup Successfully' });
     } catch (error) {
