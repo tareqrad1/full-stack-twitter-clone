@@ -1,10 +1,15 @@
 import Post from "./Post";
 import PostSkeleton from "../skeletons/PostSkeleton";
-import { POSTS } from "../../util/db/dummy";
+import { useEffect } from "react";
+import usePost from "../../hooks/usePost";
 
 const Posts = () => {
-	const isLoading = false;
-
+	const { data, getAllPosts } = usePost();
+	const isLoading = data.isLoading;
+	useEffect(() => {
+		getAllPosts();
+	}, []);
+	const POSTS = data.posts
 	return (
 		<>
 			{isLoading && (

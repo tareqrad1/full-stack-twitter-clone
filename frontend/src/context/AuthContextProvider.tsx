@@ -4,12 +4,13 @@ import toast from 'react-hot-toast';
 import { Navigate } from 'react-router-dom';
 
 type AuthUser = {
+    _id: string;
     username: string;
     fullname: string;
     password: string;
     confirmPassword: string;
     email: string;
-    profileImg: string;
+    profileImage: string;
 }
 type AuthState = {
     isLoading: boolean;
