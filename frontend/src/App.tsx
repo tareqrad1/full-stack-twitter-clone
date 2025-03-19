@@ -24,23 +24,23 @@ const App: React.FC = (): React.JSX.Element => {
 			</div>
 		)
 	};
-	console.log(state.data, 'data');
 	
-  return (
-	<div className='flex max-w-6xl mx-auto'>
-		{state.data && <Sidebar />}
-			<Routes>
-				<Route path='*' element={<h1>NotFound Page 404</h1>} />
-				<Route path='/' element={state.data ?  <HomePage /> : <Navigate to='/login' />} />
-				<Route path='/signup' element={!state?.data ? <SignUpPage /> : <Navigate to='/' />} />
-				<Route path='/login' element={!state?.data ? <LoginPage /> : <Navigate to='/' />} />
-				<Route path='/notifications' element={state?.data ? <NotificationPage /> : <Navigate to='/login' />} />
-				<Route path='/profile/:username' element={state?.data ? <ProfilePage /> : <Navigate to='/login' />} />
-			</Routes>
-		{state.data && <RightPanel />}
-		<Toaster />
-	</div>
-  )
+	return (
+		<div className='flex max-w-6xl mx-auto'>
+			{state.data && <Sidebar />}
+				<Routes>
+					<Route path='*' element={<h1>NotFound Page 404</h1>} />
+					<Route path='/' element={state.data ?  <HomePage /> : <Navigate to='/login' />} />
+					<Route path='/signup' element={!state?.data ? <SignUpPage /> : <Navigate to='/' />} />
+					<Route path='/login' element={!state?.data ? <LoginPage /> : <Navigate to='/' />} />
+					<Route path='/notifications' element={state?.data ? <NotificationPage /> : <Navigate to='/login' />} />
+					<Route path='/profile' element={<Navigate to={'/login'} /> } />
+					<Route path='/profile/:username' element={<ProfilePage /> } />
+				</Routes>
+			{state.data && <RightPanel />}
+			<Toaster />
+		</div>
+	)
 }
 
 export default App

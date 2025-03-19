@@ -65,7 +65,33 @@ export const followUnfollow = async(req, res) => {
         return res.status(500).json({ status: ERROR, error: error.message });
     }
 };
-//suggested here
+export const getSuggestedUsers = async (req, res) => {
+	try {
+		const userId = req.user._id;
+
+		const usersFollowedByMe = await User.findById(userId).select("following");
+
+		const users = await User.aggregate([
+			{
+				$match: {
+					_id: { $ne: userId },
+				},
+			},
+			{ $sample: { size: 10 } },
+		]);
+
+		// 1,2,3,4,5,6,
+		const filteredUsers = users.filter((user) => !usersFollowedByMe.following.includes(user._id));
+		const suggestedUsers = filteredUsers.slice(0, 4);
+
+		suggestedUsers.forEach((user) => (user.password = null));
+
+		res.status(200).json(suggestedUsers);
+	} catch (error) {
+		console.log("Error in getSuggestedUsers: ", error.message);
+		res.status(500).json({ error: error.message });
+	}
+};
 export const updateUserProfile = async(req, res) => {
     let { username, fullname, email, currentPassword, newPassword, bio, link, profileImage, coverImage } = req.body;
     const { error } = updateSchema.validate(req.body);

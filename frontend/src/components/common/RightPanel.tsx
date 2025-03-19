@@ -2,13 +2,21 @@ import { Link } from "react-router-dom";
 import RightPanelSkeleton from "../skeletons/RightPanelSkeleton";
 import { useEffect } from "react";
 import useUser from "../../hooks/useUser";
+import toast from "react-hot-toast";
 
 const RightPanel = () => {
-	const { suggestedUser, data } = useUser();
+	const { suggestedUser, data, followUnfollow } = useUser();
 	const isLoading = data.isLoading;
 	useEffect(() => {
 		suggestedUser();
 	}, []);
+
+	if(data.users?.length === 0) return <div className="md:w-64 w-0"></div>
+
+	async function handleClickFollow(id: string) {
+		await followUnfollow(id);
+		toast.success('follow successfully')
+	}
 	
 	return (
 		<div className='hidden lg:block my-4 mx-2'>
@@ -47,7 +55,7 @@ const RightPanel = () => {
 								<div>
 									<button
 										className='btn bg-white text-black hover:bg-white hover:opacity-90 rounded-full btn-sm'
-										onClick={(e) => e.preventDefault()}
+										onClick={() => handleClickFollow(user._id)}
 									>
 										Follow
 									</button>

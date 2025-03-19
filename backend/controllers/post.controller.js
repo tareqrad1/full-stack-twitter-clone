@@ -56,7 +56,7 @@ export const commentOnPost = async(req, res) => {
         const comment = { user: req.user._id, text };
         post.comment.push(comment);
         await post.save();
-        res.status(201).json({ status: SUCCESS, message: 'comment added successfully' });
+        res.status(201).json({ status: SUCCESS, message: 'comment added successfully', post });
     } catch (error) {
         return res.status(500).json({ status: ERROR, error: error.message });
     }
@@ -80,7 +80,8 @@ export const likeUnlikePost = async(req, res) => {
                     likedPost: id,
                 }
             })
-            res.status(200).json({ status: SUCCESS, message: 'Post Unlike Successfully' });
+            const updatedPost = await Post.findById(id);
+            res.status(200).json({ status: "SUCCESS", message: 'Post Unliked Successfully', post: updatedPost });
         }else {
             post.like.push(req.user._id);
             await User.findByIdAndUpdate(req.user._id, {
@@ -95,7 +96,9 @@ export const likeUnlikePost = async(req, res) => {
                 to: post.user,
             })
             await notification.save();
-            res.status(200).json({ status: SUCCESS, message: 'Post Liked Successfully' });
+            const updatedPost = await Post.findById(id);
+
+            res.status(200).json({ status: SUCCESS, message: 'Post Liked Successfully', post: updatedPost });
         }
     } catch (error) {
         return res.status(500).json({ status: ERROR, error: error.message });

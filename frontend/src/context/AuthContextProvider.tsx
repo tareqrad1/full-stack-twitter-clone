@@ -56,7 +56,7 @@ const AuthContextProvider = ({ children }: { children: ReactNode }) => {
         }
     }
     const signup = async (username: string, fullname: string, email: string, password: string, confirmPassword: string) => {
-        setState({ ...state, isLoading: true });
+        setState({ ...state, isLoading: true, error: null });
         try {
             await axios.post('/auth/signup', {
                 username,
@@ -65,7 +65,7 @@ const AuthContextProvider = ({ children }: { children: ReactNode }) => {
                 password,
                 confirmPassword
             });
-            setState({ ...state, error: null, isLoading: false })
+            setState({ ...state, error: null, isLoading: false });
         } catch (error: unknown) {
             if(isAxiosError(error)) {
                 if(error instanceof Error) {
@@ -76,7 +76,7 @@ const AuthContextProvider = ({ children }: { children: ReactNode }) => {
         }
     }
     const signin = async (username: string, password: string) => {
-        setState({ ...state, isLoading: true });
+        setState({ ...state, isLoading: true, error: null });
         try {
             const response = await axios.post('/auth/login', {
                 username,
