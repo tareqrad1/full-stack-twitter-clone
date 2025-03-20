@@ -9,6 +9,8 @@ import { FaLink } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
 import useUser from "../../hooks/useUser";
 import useAuth from "../../hooks/useAuth";
+import usePost from "../../hooks/usePost";
+import { formatMemberSinceDate } from "../../util/date";
 
 interface ProfileUser {
 	_id: string;
@@ -20,41 +22,47 @@ interface ProfileUser {
 	following: string[];
 	profileImage?: string;
 	coverImage?: string;
+	createdAt: string;
 }
 
 const ProfilePage = () => {
-	const { state } = useAuth();
+	const { state, updateCoverImage, updateProfileImage } = useAuth();
+	
 	const { getUserProfile, data, followUnfollow } = useUser();
+	const { data: posts } = usePost();
 	const { username } = useParams<{ username: string }>();
 	const [coverImg, setCoverImg] = useState<string | null>(null);
 	const [profileImg, setProfileImg] = useState<string | null>(null);
 	const [feedType, setFeedType] = useState<"posts" | "likes">("posts");
 
+	
+	
 	const coverImgRef = useRef<HTMLInputElement | null>(null);
 	const profileImgRef = useRef<HTMLInputElement | null>(null);
-
+	const [updated, setUpdated] = useState<boolean>(false);
+	
 	const isLoading = data?.isLoading;
 	const isMyProfile = data.profileUser?._id === state.data?._id;
 
 	useEffect(() => {
 		getUserProfile(username);
-	}, [username]);
+	}, [username, state.data, data.users]);
 
-	const handleImgChange = (e: React.ChangeEvent<HTMLInputElement>, state: "coverImg" | "profileImg") => {
+	const handleImgChange = (e: React.ChangeEvent<HTMLInputElement>, imgType: "coverImg" | "profileImg") => {
 		const file = e.target.files?.[0];
 		if (file) {
-		const reader = new FileReader();
-		reader.onload = () => {
-			if (state === "coverImg") {
-			setCoverImg(reader.result as string);
-			} else if (state === "profileImg") {
-			setProfileImg(reader.result as string);
-			}
-		};
-		reader.readAsDataURL(file);
+			const reader = new FileReader();
+			reader.onload = () => {
+				if (imgType === "coverImg") {
+					setCoverImg(reader.result as string);
+				} else if (imgType === "profileImg") {
+					setProfileImg(reader.result as string);
+				}
+			};
+			reader.readAsDataURL(file);
 		}
 	};
-
+	
 	const handleFollowUser = async (params: string | undefined) => {
 		if (params) {
 			await followUnfollow(params);
@@ -66,6 +74,8 @@ const ProfilePage = () => {
 	const profileUser = data.profileUser as ProfileUser | null;
 	if (!profileUser) return <p className="text-center text-lg mt-4">User not found</p>;
 
+	
+
 	return (
 		<div className="flex-[4_4_0] border-r border-gray-700 min-h-screen">
 		{/* HEADER */}
@@ -76,7 +86,7 @@ const ProfilePage = () => {
 			</Link>
 			<div className="flex flex-col">
 				<p className="font-bold text-lg">{profileUser.username}</p>
-				<span className="text-sm text-slate-500">{profileUser.followers.length} posts</span>
+				<span className="text-sm text-slate-500">{posts.posts.length} posts</span>
 			</div>
 			</div>
 
@@ -107,7 +117,7 @@ const ProfilePage = () => {
 				/>
 				{isMyProfile && (
 					<div className="absolute top-5 right-3 p-1 bg-primary rounded-full group-hover/avatar:opacity-100 opacity-0 cursor-pointer">
-					<MdEdit className="w-4 h-4 text-white" onClick={() => profileImgRef.current?.click()} />
+						<MdEdit className="w-4 h-4 text-white" onClick={() => profileImgRef.current?.click()} />
 					</div>
 				)}
 				</div>
@@ -125,8 +135,27 @@ const ProfilePage = () => {
 				</button>
 			)}
 			{(coverImg || profileImg) && (
-				<button className="btn btn-primary rounded-full btn-sm text-white px-4 ml-2" onClick={() => alert("Profile updated successfully")}>
-				Update
+				<button 
+					className="btn btn-primary rounded-full btn-sm text-white px-4 ml-2" 
+					onClick={async() => {
+						if(coverImg) {
+							setUpdated(true);
+							await updateCoverImage(coverImg);
+							setUpdated(false);
+							setCoverImg(null);
+							setProfileImg(null);
+						}
+						if(profileImg) {
+							setUpdated(true);
+							await updateProfileImage(profileImg);
+							setUpdated(false);
+							setCoverImg(null);
+							setProfileImg(null);
+						}
+					}}
+					disabled={updated}
+				>
+					{updated ? "Updating..." : "Update"}
 				</button>
 			)}
 			</div>
@@ -143,13 +172,13 @@ const ProfilePage = () => {
 				<div className="flex gap-1 items-center">
 					<FaLink className="w-3 h-3 text-slate-500" />
 					<a href={profileUser.link} target="_blank" rel="noreferrer" className="text-sm text-blue-500 hover:underline">
-					{profileUser.link}
+						{profileUser.link}
 					</a>
 				</div>
 				)}
 				<div className="flex gap-2 items-center">
 				<IoCalendarOutline className="w-4 h-4 text-slate-500" />
-				<span className="text-sm text-slate-500">Joined July 2021</span>
+				<span className="text-sm text-slate-500">{formatMemberSinceDate(profileUser.createdAt)}</span>
 				</div>
 			</div>
 

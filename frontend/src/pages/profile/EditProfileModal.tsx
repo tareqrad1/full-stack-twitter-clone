@@ -1,20 +1,39 @@
-import { useState } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
+import useUser from "../../hooks/useUser";
+import toast from "react-hot-toast";
+import useAuth from "../../hooks/useAuth";
+
+
+type FormTypes = {
+	fullName: string;
+	username: string;
+	email: string;
+	bio: string;
+	link: string;
+	newPassword: string;
+	currentPassword: string;
+}
 
 const EditProfileModal = () => {
-	const [formData, setFormData] = useState({
-		fullName: "",
-		username: "",
-		email: "",
-		bio: "",
-		link: "",
-		newPassword: "",
-		currentPassword: "",
-	});
+	const { state, updateProfile } = useAuth();
 
-	const handleInputChange = (e) => {
+	const [formData, setFormData] = useState<FormTypes>({
+		fullName: state.data?.fullname ?? "",
+		username: state.data?.username ?? "",
+		email: state.data?.email ?? "",
+		bio: state.data?.bio ?? "",
+		link: state.data?.link ?? "",
+		newPassword: '',
+		currentPassword: '',
+	});
+	const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
 		setFormData({ ...formData, [e.target.name]: e.target.value });
 	};
-
+	const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+		e.preventDefault()
+		await updateProfile(formData.fullName, formData.username, formData.email, formData.bio, formData.currentPassword, formData.newPassword, formData.link);
+		toast.success('Updated successfully');
+	}
 	return (
 		<>
 			<button
@@ -28,10 +47,7 @@ const EditProfileModal = () => {
 					<h3 className='font-bold text-lg my-3'>Update Profile</h3>
 					<form
 						className='flex flex-col gap-4'
-						onSubmit={(e) => {
-							e.preventDefault();
-							alert("Profile updated successfully");
-						}}
+						onSubmit={handleSubmit}
 					>
 						<div className='flex flex-wrap gap-2'>
 							<input

@@ -94,10 +94,10 @@ export const getSuggestedUsers = async (req, res) => {
 };
 export const updateUserProfile = async(req, res) => {
     let { username, fullname, email, currentPassword, newPassword, bio, link, profileImage, coverImage } = req.body;
-    const { error } = updateSchema.validate(req.body);
-    if(error) {
-        return res.status(400).json({ status: FAIL, error: error.details[0].message });
-    }
+    // const { error } = updateSchema.validate(req.body);
+    // if(error) {
+    //     return res.status(400).json({ status: FAIL, error: error.details[0].message });
+    // }
     try {
         let user = await User.findById(req.user._id);
         if(!user) return res.status(404).json({ status: FAIL, error: 'User Not Found' });

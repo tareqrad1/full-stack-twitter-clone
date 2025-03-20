@@ -11,6 +11,9 @@ type AuthUser = {
     confirmPassword: string;
     email: string;
     profileImage: string;
+    coverImage: string;
+    bio: string;
+    link: string;
 }
 type AuthState = {
     isLoading: boolean;
@@ -25,6 +28,9 @@ interface AuthContextShape {
     signup: (username: string, fullname: string, email: string, password: string, confirmPassword: string) => Promise<void>;
     signin: (username: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
+    updateProfile: (fullname: string, username: string, email: string, bio: string, currentPassword: string, newPassword: string, link: string) => Promise<void>;
+    updateCoverImage: (coverImage: string) => Promise<void>;
+    updateProfileImage: (profileImage: string) => Promise<void>;
 }
 export const AuthContext = createContext<AuthContextShape | undefined>(undefined);
 
@@ -41,15 +47,15 @@ const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     });
     // start the functions
     const checkAuth = async () => {
-        setState({ ...state, isCheckingAuth: true });
+        setState({ ...state, isCheckingAuth: true, error: null });
         try {
             const response = await axios.get('/auth/me');
-            setState({ ...state, data: response.data?.user, isCheckingAuth: false });
+            setState({ ...state, data: response.data?.user, isCheckingAuth: false, error: null });
         } catch (error: unknown) {
             if(isAxiosError(error)) {
                 if(error instanceof Error) {
                     console.log(error);
-                    setState({ ...state , isCheckingAuth: false, data: null });
+                    setState({ ...state , isCheckingAuth: false, data: null, error: null });
                     throw error;
                 }
             }
@@ -107,8 +113,65 @@ const AuthContextProvider = ({ children }: { children: ReactNode }) => {
             }
         }
     }
+    const updateProfile = async (fullname: string, username: string, email: string, bio: string, currentPassword: string, newPassword: string, link: string) => {
+        setState({ ...state, isLoading: true, error: null });
+        try {
+            const response = await axios.post('/users/update', {
+                fullname,
+                email,
+                username,
+                bio,
+                currentPassword,
+                newPassword,
+                link,
+            });
+            setState({ ...state, data: response?.data?.user, isLoading: false, error: null });
+        } catch (error: unknown) {
+            if(axios.isAxiosError(error)) {
+                if(error instanceof Error) {
+                    setState({ ...state, error: error.response?.data.error, isLoading: false });
+                    toast.error(error.response?.data.error)
+                    throw error;
+                }
+            }
+        }
+    }
+    const updateCoverImage = async (coverImage: string) => {
+        setState({ ...state, isLoading: true, error: null });
+        try {
+            const response = await axios.post('/users/update/', {
+                coverImage,
+            });
+            setState({ ...state, data: response?.data?.user, isLoading: false, error: null });
+        } catch (error: unknown) {
+            if(axios.isAxiosError(error)) {
+                if(error instanceof Error) {
+                    setState({ ...state, error: error.response?.data.error, isLoading: false });
+                    toast.error(error.response?.data.error)
+                    throw error;
+                }
+            }
+        }
+    };
+    const updateProfileImage = async (profileImage: string) => {
+        setState({ ...state, isLoading: true, error: null });
+        try {
+            const response = await axios.post('/users/update/', {
+                profileImage,
+            });
+            setState({ ...state, data: response?.data?.user, isLoading: false, error: null });
+        } catch (error: unknown) {
+            if(axios.isAxiosError(error)) {
+                if(error instanceof Error) {
+                    setState({ ...state, error: error.response?.data.error, isLoading: false });
+                    toast.error(error.response?.data.error)
+                    throw error;
+                }
+            }
+        }
+    }
     return (
-        <AuthContext.Provider value={{ state, setState, checkAuth, signup, signin, logout  }}>
+        <AuthContext.Provider value={{ state, setState, checkAuth, signup, signin, logout, updateProfile, updateCoverImage, updateProfileImage  }}>
             {children}
         </AuthContext.Provider>
     )

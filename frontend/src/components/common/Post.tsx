@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 import usePost from "../../hooks/usePost";
+import {formatPostDate} from '../../util/date/index';
+
 
 interface User {
 	_id: string;
@@ -25,6 +27,7 @@ interface PostTypes {
 	user: User;
 	like: string[];
 	comment: Comment[];
+	createdAt: string;
 }
 
 const Post: React.FC<{ post: PostTypes }> = ({ post }) => {
@@ -35,7 +38,8 @@ const Post: React.FC<{ post: PostTypes }> = ({ post }) => {
 	// Check if the user has liked the post
 	const isLiked = post.like.includes(state?.data?._id ?? "");
 	const isMyPost = post.user._id === state?.data?._id;
-	const formattedDate = "1h"; // Replace with a dynamic date/time formatting logic
+	const formattedDate = formatPostDate(post.createdAt) // Replace with a dynamic date/time formatting logic
+	// const formattedDate = new Date(post.createdAt).toLocaleString(); // Replace with a dynamic date/time formatting logic
 
 	const handlePostComment = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -52,7 +56,7 @@ const Post: React.FC<{ post: PostTypes }> = ({ post }) => {
 	return (
 		<div className="flex gap-2 items-start p-4 border-b border-gray-700">
 		<div className="avatar">
-			<Link to={`/profile/${post.user.username}`} className="w-8 rounded-full overflow-hidden">
+			<Link to={`/profile/${post.user.username}`} className=" w-8 h-8 rounded-full overflow-hidden">
 			<img src={post.user.profileImage || "/avatar-placeholder.png"} alt="Profile" />
 			</Link>
 		</div>
@@ -137,7 +141,7 @@ const Post: React.FC<{ post: PostTypes }> = ({ post }) => {
 				</dialog>
 				<div className="flex gap-1 items-center group cursor-pointer">
 				<BiRepost className="w-6 h-6 text-slate-500 group-hover:text-green-500" />
-				<span className="text-sm text-slate-500 group-hover:text-green-500">0</span>
+				<span className="text-sm text-slate-500 group-hover:text-green-500">{Math.floor(Math.random() * 1000)}K</span>
 				</div>
 				<div className="flex gap-1 items-center group cursor-pointer" onClick={handleLikePost}>
 				{isLiked ? (
@@ -145,7 +149,7 @@ const Post: React.FC<{ post: PostTypes }> = ({ post }) => {
 				) : (
 					<FaRegHeart className="w-4 h-4 cursor-pointer text-slate-500 group-hover:text-pink-500" />
 				)}
-				<span className={`text-sm text-slate-500 group-hover:text-pink-500 ${isLiked ? "text-pink-500" : ""}`}>
+				<span className={`text-sm  group-hover:text-pink-500 ${isLiked ? "text-pink-500" : "text-slate-500"}`}>
 					{post.like.length}
 				</span>
 				</div>

@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import RightPanelSkeleton from "../skeletons/RightPanelSkeleton";
 import { useEffect } from "react";
 import useUser from "../../hooks/useUser";
-import toast from "react-hot-toast";
 
 const RightPanel = () => {
 	const { suggestedUser, data, followUnfollow } = useUser();
@@ -15,7 +14,6 @@ const RightPanel = () => {
 
 	async function handleClickFollow(id: string) {
 		await followUnfollow(id);
-		toast.success('follow successfully')
 	}
 	
 	return (

@@ -11,6 +11,7 @@ type PostTypes = {
     user: string;
     like: [];
     comment: { user: string; text: string }[];
+    createdAt: string
 }
 
 type PostState = {
@@ -91,7 +92,6 @@ const PostContextProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
             const response = await axios.post(`/posts/like/${params}`);
             setData({ ...data, posts: data.posts.map((post) => post._id === params ? response.data.post : post), isLoading: false });
-            toast.success(response.data?.message);
         } catch (error: unknown) {
             if(axios.isAxiosError(error)) {
                 if(error instanceof Error) {

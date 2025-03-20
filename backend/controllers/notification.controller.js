@@ -1,17 +1,23 @@
 import Notification from '../models/notificationSchema.js';
 import { ERROR, FAIL, SUCCESS } from '../utils/httpStatus.js';
 
-export const getMyNotification = async(req, res) => {
+export const getMyNotification = async (req, res) => {
     try {
-        const notification = await Notification.find({ to: req.user._id }).populate({ // get all notification to me (to: req.user.id)
-            path: 'from',
-            select: 'profileImage username'
-        });
-        if(!notification) return res.status(404).json({ status: FAIL, error: 'No Notification Found' });
-        await Notification.updateOne({ read: true });
-        res.status(200).json({ status: SUCCESS, notification });
+        const notifications = await Notification.find({ to: req.user._id })
+            .populate({
+                path: 'from',
+                select: 'profileImage username'
+            });
+            
+        const filteredNotifications = notifications.filter(n => n.from._id.toString() !== req.user._id.toString());
+        if (filteredNotifications.length === 0) {
+            return res.status(404).json({ status: "FAIL", error: "No Notification Found" });
+        }
+        // Mark notifications as read
+        await Notification.updateMany({ to: req.user._id }, { read: true });
+        res.status(200).json({ status: "SUCCESS", notification: filteredNotifications });
     } catch (error) {
-        return res.status(500).json({ status: ERROR, error: error.message });
+        return res.status(500).json({ status: "ERROR", error: error.message });
     }
 };
 

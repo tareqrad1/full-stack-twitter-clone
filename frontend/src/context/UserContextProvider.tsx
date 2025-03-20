@@ -83,7 +83,7 @@ const UserContextProvider = ({ children }: { children: React.ReactNode }) => {
                 }
             }
         }
-    }
+    };
     return (
         <UserContext.Provider value={{ data, setData, suggestedUser, followUnfollow, getUserProfile }}>
             {children}
